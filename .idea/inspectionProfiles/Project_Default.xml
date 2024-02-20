@@ -1,0 +1,23 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="MavenPackageUpdate" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="excludeList">
+        <list>
+          <option value="org.springframework:spring-tx" />
+          <option value="org.apache.commons:commons-lang3" />
+          <option value="org.springframework:spring-websocket" />
+          <option value="org.reflections:reflections" />
+          <option value="ch.qos.logback:logback-classic" />
+          <option value="org.slf4j:slf4j-api" />
+          <option value="org.json:json" />
+          <option value="org.hibernate:hibernate-c3p0" />
+          <option value="org.springframework:spring-orm" />
+          <option value="org.hibernate:hibernate-core" />
+          <option value="commons-codec:commons-codec" />
+          <option value="org.apache.httpcomponents:httpclient" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
