@@ -1,11 +1,13 @@
 package org.example.utils;
 import org.example.entities.User;
+import org.example.entities.Event;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.hibernate.Session;
 import javax.annotation.PostConstruct;
+import javax.persistence.Query;
 import java.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,7 @@ public class Persist {
 
     @PostConstruct
     public void init () {
-       createDbConnection(Constants.DB_USERNAME, Constants.DB_PASSWORD);
+        createDbConnection(Constants.DB_USERNAME, Constants.DB_PASSWORD);
 
     }
 
@@ -43,58 +45,59 @@ public class Persist {
     }
 
 
-    public User login (String username, String password) {
+    public User login(String username, String password) {
         User user = null;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, secret FROM users WHERE username = ? AND password = ? ");
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String secret = resultSet.getString("secret");
-                user = new User();
-                user.setId(id);
-                user.setSecret(secret);
-            }
-        } catch (SQLException e) {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM User WHERE username = :username AND password = :password");
+            query.setParameter("username", username);
+            query.setParameter("password", password);
+            user = (User) query.getSingleResult();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return user;
-
     }
 
-    public boolean checkIfUsernameAvailable (String username) {
+    public boolean checkIfUsernameAvailable(String username) {
         boolean available = false;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT username FROM users WHERE username = ?");
-            preparedStatement.setString(1,username);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM User WHERE username = :username");
+            query.setParameter("username", username);
+            if (query.getResultList().isEmpty()) {
                 available = true;
             }
-        }catch (SQLException e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return available;
     }
 
-    public boolean addUser (User user) {
+    public boolean addUser(User user) {
         boolean success = false;
         try {
             if (checkIfUsernameAvailable(user.getUsername())) {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users (username, password) VALUES ( ? , ? )");
-                preparedStatement.setString(1, user.getUsername());
-                preparedStatement.setString(2, user.getPassword());
-                preparedStatement.executeUpdate();
+                Session session = sessionFactory.getCurrentSession();
+                session.save(user);
                 success = true;
             }
-        }catch (SQLException e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return success;
     }
 
+    public boolean addEvent(Event event) {
+        boolean success = false;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            session.save(event);
+            success = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 
 }

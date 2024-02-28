@@ -15,5 +15,19 @@
 
     </class>
 
+    <class name="org.example.entities.Event" table="events" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="name"/>
+        <property name="description" type="string" column="description"/>
+        <property name="date" type="date" column="date"/>
+        <property name="location" type="string" column="location"/>
+        <property name="budget" type="float" column="budget"/>
+        <property name="amountInvited" type="int" column="amountInvited"/>
+        <many-to-one name="owner" class="org.example.entities.User" column="ownerId"  not-null="true" />
+    </class>
+
+
 
 </hibernate-mapping>
