@@ -17,14 +17,16 @@ public class User {
         this.secret = secret;
     }
 
-    public User(int id, String username, String password) {
-        this(username, password);
-        this.id = id;
-    }
+//    public User(int id, String username, String password) {
+//        this(username, password);
+//        this.id = id;
+//    }
 
-    public User(String username, String password) {
+    public User(String username, String password , String mail) {
         this.username = username;
         this.password = password;
+        this.mail = mail;
+        this.secret = createSecret();
     }
 
     public User(){
@@ -70,5 +72,13 @@ public class User {
 
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public String createSecret (){
+        String secret = "";
+        for (int i = 0; i < 10; i++) {
+            secret += (char) (Math.random() * 26 + 97);
+        }
+        return secret;
     }
 }

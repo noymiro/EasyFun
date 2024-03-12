@@ -9,6 +9,8 @@ import org.hibernate.Session;
 import javax.annotation.PostConstruct;
 import javax.persistence.Query;
 import java.sql.*;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class Persist {
 
     private final SessionFactory sessionFactory;
-    private Connection connection ;
+    private Connection connection;
 
 
     @Autowired
@@ -27,19 +29,19 @@ public class Persist {
     }
 
     @PostConstruct
-    public void init () {
+    public void init() {
         createDbConnection(Constants.DB_USERNAME, Constants.DB_PASSWORD);
 
     }
 
 
-    private void createDbConnection(String username, String password){
+    private void createDbConnection(String username, String password) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/easyFun", username, password);
             System.out.println("Connection successful!");
             System.out.println();
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Cannot create DB connection!");
         }
     }
@@ -77,15 +79,25 @@ public class Persist {
     public boolean addUser(User user) {
         boolean success = false;
         try {
-            if (checkIfUsernameAvailable(user.getUsername())) {
-                Session session = sessionFactory.getCurrentSession();
-                session.save(user);
-                success = true;
-            }
+            Session session = sessionFactory.getCurrentSession();
+            session.save(user);
+            success = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return success;
+    }
+
+    public List<User> getUsers() {
+        List<User> users = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            users = session.createQuery("FROM User").getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return users;
     }
 
     public boolean addEvent(Event event) {
@@ -98,6 +110,18 @@ public class Persist {
             e.printStackTrace();
         }
         return success;
+    }
+
+    public List<Event> getEvents() {
+        List<Event> events = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            events = session.createQuery("FROM Event").getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return events;
     }
 
 }
