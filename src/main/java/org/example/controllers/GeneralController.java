@@ -1,4 +1,5 @@
 package org.example.controllers;
+import org.example.entities.Event;
 import org.example.entities.User;
 import org.example.responses.BasicResponse;
 import org.example.utils.EmailValidator;
@@ -23,13 +24,13 @@ public class GeneralController {
 
 
     @RequestMapping (value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
-    public BasicResponse login (String username, String password) {
+    public BasicResponse login (String mail, String password) {
         BasicResponse basicResponse = null;
         boolean success = false;
         Integer errorCode = null;
-        if (username != null && username.length() > 0) {
+        if (mail != null && mail.length() > 0) {
             if (password != null && password.length() > 0) {
-                User user = persist.login(username, password);
+                User user = persist.login(mail, password);
                 if (user != null) {
                     basicResponse = new LoginResponse(true, errorCode, user.getId(), user.getSecret());
                 } else {
@@ -67,7 +68,40 @@ public class GeneralController {
                             }
                             User user = new User(username, password, mail);
                             persist.addUser(user);
+                            System.out.println("User added: " + user.getUsername());
                             return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @RequestMapping (value = "/get-userByMail")
+    public User getUser (String mail) {
+        User user = persist.getUserByMail(mail);
+        if (user != null) {
+            return user;
+        }
+        return null;
+
+    }
+
+    @RequestMapping (value = "/plan-event")
+    public boolean planEvent (String secret, String typeEvent,String date,String location ,int guests) {
+        if (secret != null && secret.length() > 0) {
+            if (typeEvent != null && typeEvent.length() > 0) {
+                if (date != null && date.length() > 0) {
+                    if (guests > 0) {
+                        List<User> users = persist.getUsers();
+                        for (User user : users) {
+                            if (user.getSecret().equals(secret)) {
+                                System.out.println("Event planned: " + typeEvent + " " + date + " " + guests);
+                                Event event = new Event(typeEvent, date,location, guests);
+                                persist.addEvent(event);
+                                return true;
+                            }
                         }
                     }
                 }

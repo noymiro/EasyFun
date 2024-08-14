@@ -38,7 +38,7 @@ public class Persist {
     private void createDbConnection(String username, String password) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/easyFun", username, password);
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/easyfun", username, password);
             System.out.println("Connection successful!");
             System.out.println();
         } catch (Exception e) {
@@ -47,12 +47,12 @@ public class Persist {
     }
 
 
-    public User login(String username, String password) {
+    public User login(String mail, String password) {
         User user = null;
         try {
             Session session = sessionFactory.getCurrentSession();
-            Query query = session.createQuery("FROM User WHERE username = :username AND password = :password");
-            query.setParameter("username", username);
+            Query query = session.createQuery("FROM User WHERE mail = :mail AND password = :password");
+            query.setParameter("mail", mail);
             query.setParameter("password", password);
             user = (User) query.getSingleResult();
         } catch (Exception e) {
@@ -98,6 +98,20 @@ public class Persist {
 
         }
         return users;
+    }
+
+    public User getUserByMail(String mail) {
+        User user = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM User WHERE mail = :mail");
+            query.setParameter("mail", mail);
+            user = (User) query.getSingleResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+
     }
 
     public boolean addEvent(Event event) {

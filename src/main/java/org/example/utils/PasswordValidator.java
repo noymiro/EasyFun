@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 public class PasswordValidator {
     public static boolean isValid(String password) {
         String passwordRegex = "^(?=.*[0-9])"
-                + "(?=.[a-z])(?=.[A-Z])"
-                + "(?=.*[@#$%^&+=])"
+//                + "(?=.[a-z])(?=.[A-Z])"
+//                + "(?=.*[@#$%^&+=])"
                 + "(?=\\S+$).{8,20}$";
         Pattern pat = Pattern.compile(passwordRegex);
         if (password == null)
