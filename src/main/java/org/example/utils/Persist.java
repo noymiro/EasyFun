@@ -100,17 +100,18 @@ public class Persist {
         return users;
     }
 
-    public User getUserByMail(String mail) {
-        User user = null;
+    public String getSecretUserByMail(String mail) {
+        String secret = null;
         try {
             Session session = sessionFactory.getCurrentSession();
             Query query = session.createQuery("FROM User WHERE mail = :mail");
             query.setParameter("mail", mail);
-            user = (User) query.getSingleResult();
+            User user = (User) query.getSingleResult();
+            secret = user.getSecret();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return user;
+        return secret;
 
     }
 

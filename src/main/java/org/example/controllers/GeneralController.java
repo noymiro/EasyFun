@@ -79,10 +79,11 @@ public class GeneralController {
     }
 
     @RequestMapping (value = "/get-userByMail")
-    public User getUser (String mail) {
-        User user = persist.getUserByMail(mail);
-        if (user != null) {
-            return user;
+    public String getUser (String mail) {
+        String secretUserByMail = persist.getSecretUserByMail(mail);
+        if (
+                secretUserByMail != null && secretUserByMail.length() > 0) {
+            return secretUserByMail;
         }
         return null;
 
@@ -96,6 +97,7 @@ public class GeneralController {
                     if (guests > 0) {
                         List<User> users = persist.getUsers();
                         for (User user : users) {
+                            System.out.println(user.getSecret());
                             if (user.getSecret().equals(secret)) {
                                 System.out.println("Event planned: " + typeEvent + " " + date + " " + guests);
                                 Event event = new Event(typeEvent, date,location, guests);
