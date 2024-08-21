@@ -90,7 +90,7 @@ public class GeneralController {
     }
 
     @RequestMapping (value = "/plan-event")
-    public boolean planEvent (String secret, String typeEvent,String date,String location ,int guests) {
+    public boolean planEvent (String secret, String typeEvent,String date,String location ,int guests,float budget) {
         if (secret != null && secret.length() > 0) {
             if (typeEvent != null && typeEvent.length() > 0) {
                 if (date != null && date.length() > 0) {
@@ -99,8 +99,8 @@ public class GeneralController {
                         for (User user : users) {
                             System.out.println(user.getSecret());
                             if (user.getSecret().equals(secret)) {
-                                System.out.println("Event planned: " + typeEvent + " " + date + " " + guests);
-                                Event event = new Event(typeEvent, date,location, guests);
+                                System.out.println("Event planned: " + typeEvent + " " + date + " " + guests + " " + location + " " + budget);
+                                Event event = new Event(typeEvent, date,location, guests, budget, secret);
                                 persist.addEvent(event);
                                 return true;
                             }
@@ -110,6 +110,20 @@ public class GeneralController {
             }
         }
         return false;
+    }
+
+    @RequestMapping (value = "/save-selection")
+    public boolean saveSelection (String venue, String food, String attraction) {
+        if (venue != null && venue.length() > 0) {
+            if (food != null && food.length() > 0) {
+                if (attraction != null && attraction.length() > 0) {
+                    System.out.println("Selection saved: " + venue + " " + food + " " + attraction);
+                    return true;
+                }
+            }
+        }
+        return false;
+
     }
 
 }

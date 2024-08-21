@@ -19,6 +19,7 @@
         <id name="id" type="int" column="id">
             <generator class="native"/>
         </id>
+        <property name="secretOfUser" type="string" column="secretOfUser"/>
         <property name="typeEvent" type="string" column="typeEvent"/>
         <property name="date" type="string" column="date"/>
         <property name="location" type="string" column="location"/>

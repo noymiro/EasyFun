@@ -7,6 +7,7 @@ public class Event {
     private String location;
     private float budget;
     private int guests;
+    private String secretOfUser;
 
 
     public Event (){
@@ -20,6 +21,17 @@ public class Event {
         this.guests = guests;
 
     }
+
+    public Event(String typeEvent, String date,String location, int guests, float budget, String secretOfUser) {
+        this.typeEvent = typeEvent;
+        this.date = date;
+        this.location = location;
+        this.guests = guests;
+        this.budget = budget;
+        this.secretOfUser = secretOfUser;
+
+    }
+
 
     public String getDate() {
         return date;
@@ -69,5 +81,13 @@ public class Event {
 
     public void setGuests(int guests) {
         this.guests = guests;
+    }
+
+    public String getSecretOfUser() {
+        return secretOfUser;
+    }
+
+    public void setSecretOfUser(String secretOfUser) {
+        this.secretOfUser = secretOfUser;
     }
 }
