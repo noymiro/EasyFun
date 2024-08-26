@@ -3,7 +3,6 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-
     <class name="org.example.entities.User" table="users" lazy="false">
         <id name="id" type="int" column="id">
             <generator class="native"/>
@@ -12,7 +11,6 @@
         <property name="password" type="string" column="password"/>
         <property name="mail" type="string" column="mail"/>
         <property name="secret" type="string" column="secret"/>
-
     </class>
 
     <class name="org.example.entities.Event" table="events" lazy="false">
@@ -25,9 +23,11 @@
         <property name="location" type="string" column="location"/>
         <property name="budget" type="float" column="budget"/>
         <property name="guests" type="int" column="guests"/>
-
+        <list name="elementsOfEvent" table="event_elements" cascade="all">
+            <key column="event_id"/>
+            <list-index column="list_index"/>
+            <element type="string" column="element"/>
+        </list>
     </class>
-
-
 
 </hibernate-mapping>

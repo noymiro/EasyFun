@@ -139,4 +139,38 @@ public class Persist {
         return events;
     }
 
+    public Event getEventBySecret(String secret) {
+        Event event = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM Event WHERE secretOfUser = :secret");
+            query.setParameter("secret", secret);
+            event = (Event) query.getSingleResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return event;
+    }
+
+    public Event getEventById(int id) {
+        Event event = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM Event WHERE id = :id");
+            query.setParameter("id", id);
+            event = (Event) query.getSingleResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return event;
+    }
+
+    public void updateEvent(Event event) {
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            session.update(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

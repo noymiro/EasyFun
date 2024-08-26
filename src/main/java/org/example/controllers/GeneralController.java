@@ -5,9 +5,8 @@ import org.example.responses.BasicResponse;
 import org.example.utils.EmailValidator;
 import org.example.utils.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import org.example.responses.LoginResponse;
 import org.example.utils.Persist;
 import java.util.List;
@@ -90,7 +89,7 @@ public class GeneralController {
     }
 
     @RequestMapping (value = "/plan-event")
-    public boolean planEvent (String secret, String typeEvent,String date,String location ,int guests,float budget) {
+    public int planEvent (String secret, String typeEvent,String date,String location ,int guests,float budget) {
         if (secret != null && secret.length() > 0) {
             if (typeEvent != null && typeEvent.length() > 0) {
                 if (date != null && date.length() > 0) {
@@ -102,28 +101,28 @@ public class GeneralController {
                                 System.out.println("Event planned: " + typeEvent + " " + date + " " + guests + " " + location + " " + budget);
                                 Event event = new Event(typeEvent, date,location, guests, budget, secret);
                                 persist.addEvent(event);
-                                return true;
+                                return event.getId();
                             }
                         }
                     }
                 }
             }
         }
-        return false;
+        return -1;
     }
 
-    @RequestMapping (value = "/save-selection")
-    public boolean saveSelection (String venue, String food, String attraction) {
-        if (venue != null && venue.length() > 0) {
-            if (food != null && food.length() > 0) {
-                if (attraction != null && attraction.length() > 0) {
-                    System.out.println("Selection saved: " + venue + " " + food + " " + attraction);
-                    return true;
-                }
+    @RequestMapping(value = "/save-selection", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public boolean saveSelection(@RequestParam(name = "eventId", required = true) int eventId, @RequestBody List<String> elements) {
+        boolean success = false;
+        if (eventId > 0 && elements != null && !elements.isEmpty()) {
+            Event event = persist.getEventById(eventId);
+            if (event != null) {
+                event.setElementsOfEvent(elements);
+                persist.updateEvent(event);
+                success = true;
             }
         }
-        return false;
-
+        return success;
     }
 
 }

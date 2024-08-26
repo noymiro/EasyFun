@@ -1,5 +1,7 @@
 package org.example.entities;
 
+import java.util.List;
+
 public class Event {
     private String date;
     private String typeEvent;
@@ -8,6 +10,7 @@ public class Event {
     private float budget;
     private int guests;
     private String secretOfUser;
+    private List<String> elementsOfEvent;
 
 
     public Event (){
@@ -89,5 +92,13 @@ public class Event {
 
     public void setSecretOfUser(String secretOfUser) {
         this.secretOfUser = secretOfUser;
+    }
+
+    public List<String> getElementsOfEvent() {
+        return elementsOfEvent;
+    }
+
+    public void setElementsOfEvent(List<String> elementsOfEvent) {
+        this.elementsOfEvent = elementsOfEvent;
     }
 }
