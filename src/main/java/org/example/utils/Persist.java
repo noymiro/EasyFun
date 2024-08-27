@@ -1,4 +1,5 @@
 package org.example.utils;
+
 import org.example.entities.User;
 import org.example.entities.Event;
 import org.hibernate.SessionFactory;

@@ -6,23 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.sql.DataSource;
 import java.util.Properties;
 
 import static org.example.utils.Constants.DB_PASSWORD;
 import static org.example.utils.Constants.DB_USERNAME;
-import static org.example.utils.Constants.DB_PASSWORD;
-import static org.example.utils.Constants.DB_USERNAME;
-
 
 @Configuration
 @Profile("production")
 public class AppConfig {
-
 
     @Bean
     public DataSource dataSource() throws Exception {
@@ -54,7 +50,7 @@ public class AppConfig {
     }
 
     @Bean
-    public HibernateTransactionManager transactionManager() throws Exception{
+    public HibernateTransactionManager transactionManager() throws Exception {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager();
         transactionManager.setSessionFactory(sessionFactory().getObject());
         return transactionManager;
@@ -62,12 +58,16 @@ public class AppConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
+        return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*");
+                registry.addMapping("/*").allowedOrigins("");
             }
         };
     }
 
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }

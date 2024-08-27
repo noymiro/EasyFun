@@ -1,4 +1,5 @@
 package org.example.controllers;
+
 import org.example.entities.Event;
 import org.example.entities.User;
 import org.example.responses.BasicResponse;
