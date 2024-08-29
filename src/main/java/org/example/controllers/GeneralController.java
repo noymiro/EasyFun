@@ -10,7 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.example.responses.LoginResponse;
 import org.example.utils.Persist;
+
 import java.util.List;
+
 import static org.example.utils.Errors.*;
 
 @RestController
@@ -21,10 +23,8 @@ public class GeneralController {
     private Persist persist;
 
 
-
-
-    @RequestMapping (value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
-    public BasicResponse login (String mail, String password) {
+    @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
+    public BasicResponse login(String mail, String password) {
         BasicResponse basicResponse = null;
         boolean success = false;
         Integer errorCode = null;
@@ -48,8 +48,8 @@ public class GeneralController {
         return basicResponse;
     }
 
-    @RequestMapping (value = "add-user")
-    public boolean addUser (String username, String password , String mail) {
+    @RequestMapping(value = "add-user")
+    public boolean addUser(String username, String password, String mail) {
         if (username != null && username.length() > 0) {
             if (password != null && password.length() > 0) {
                 if (mail != null && mail.length() > 0) {
@@ -78,8 +78,8 @@ public class GeneralController {
         return false;
     }
 
-    @RequestMapping (value = "/get-userByMail")
-    public String getUser (String mail) {
+    @RequestMapping(value = "/get-userByMail")
+    public String getUser(String mail) {
         String secretUserByMail = persist.getSecretUserByMail(mail);
         if (
                 secretUserByMail != null && secretUserByMail.length() > 0) {
@@ -89,8 +89,8 @@ public class GeneralController {
 
     }
 
-    @RequestMapping (value = "/plan-event")
-    public int planEvent (String secret, String typeEvent,String date,String location ,int guests,float budget) {
+    @RequestMapping(value = "/plan-event")
+    public int planEvent(String secret, String typeEvent, String date, String location, int guests, float budget) {
         if (secret != null && secret.length() > 0) {
             if (typeEvent != null && typeEvent.length() > 0) {
                 if (date != null && date.length() > 0) {
@@ -100,7 +100,7 @@ public class GeneralController {
                             System.out.println(user.getSecret());
                             if (user.getSecret().equals(secret)) {
                                 System.out.println("Event planned: " + typeEvent + " " + date + " " + guests + " " + location + " " + budget);
-                                Event event = new Event(typeEvent, date,location, guests, budget, secret);
+                                Event event = new Event(typeEvent, date, location, guests, budget, secret);
                                 persist.addEvent(event);
                                 return event.getId();
                             }
@@ -125,5 +125,19 @@ public class GeneralController {
         }
         return success;
     }
+
+    @RequestMapping(value = "/personal-area", method = RequestMethod.GET)
+    public List<Object[]> personalArea(@RequestParam String secret) {
+        if (secret != null && !secret.isEmpty()) {
+            List<User> users = persist.getUsers();
+            for (User user : users) {
+                if (user.getSecret().equals(secret)) {
+                    return persist.getPersonalArea(secret);
+                }
+            }
+        }
+        return null;
+    }
+
 
 }

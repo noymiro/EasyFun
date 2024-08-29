@@ -12,9 +12,6 @@ import javax.persistence.Query;
 import java.sql.*;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Transactional
 @Component
 @SuppressWarnings("unchecked")
@@ -173,5 +170,25 @@ public class Persist {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Object[]> getPersonalArea(String secret) {
+        List<Object[]> results = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+
+            // JOIN query to retrieve user, events, and elements based on user secret
+            String hql = "SELECT u, e, el FROM User u " +
+                    "JOIN Event e ON u.secret = e.secretOfUser " +
+                    "JOIN e.elementsOfEvent el " +
+                    "WHERE u.secret = :secret";
+            Query query = session.createQuery(hql);
+            query.setParameter("secret", secret);
+            results = query.getResultList();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return results;
     }
 }
