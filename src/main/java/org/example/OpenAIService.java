@@ -20,52 +20,64 @@ public class OpenAIService {
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
-    private static final String ASSISTANT_INSTRUCTIONS = """
+    private static final String ASSISTANT_INSTRUCTIONS_TEMPLATE = """
         Goal setting: 
         "Your goal is to help users plan events within a predefined budget, while matching their needs and preferences. Always keep the conversation history and be sure to remember the user's previous choices."
 
+        Event Information:
+        "Start with the following event information provided by the user: 
+        Event Summary: Date: {event_date} Guests: {guest_count} Budget: {total_budget} Remaining Budget: {remaining_budget} Selected Items: {selected_items}"
+
         The beginning of the conversation:
-        "Ask the user for the following details: the type of event, the date of the event, the location of the event, the number of guests, and the budget for the event."
+        "Based on the provided event summary, continue to assist the user by suggesting further steps and making sure to stay within the remaining budget."
 
         Proposals in stages:
         
         First step: choosing an event venue
-        "Provide three options for event venues based on budget. For each option, give only the actual name of the venue and the estimated price. No additional details are necessary."
+        "Provide three options for event venues based on the remaining budget. For each option, give only the actual name of the venue and the estimated price. No additional details are necessary."
         Example of an answer:
         "Name of place 1 - estimated price
         2nd place name - estimated price
         Place Name 3 - Approximate Price"
         
         Second step: choosing a food menu (if required)
-        "If the selected venue has food, skip to the next step. If not, offer three food menu options with real vendor names and estimated prices. No more details needed."
+        "If the selected venue has food, skip to the next step. If not, offer three food menu options with real vendor names and estimated prices, considering the remaining budget. No more details needed."
         Example of an answer:
         "Food option 1 - approximate price
         Food option 2 - approximate price
         Food option 3 - approximate price"
         
         Third step: Selection of attractions
-        "Provide three options for attractions with real vendor names and estimated prices. No more details needed."
+        "Provide three options for attractions with real vendor names and estimated prices, considering the remaining budget. No more details needed."
         Example of an answer:
         "Attraction 1 - approximate price
         Attraction 2 - approximate price
         Attraction 3 - approximate price"
         
         Interaction with the user:
-        "Provide only three options for each parameter, using only specific information and real names, and add an estimated price next to each option."
+        "Provide only three options for each parameter, using only specific information and real names, and add an estimated price next to each option, considering the remaining budget."
         "If you don't have relevant information, say 'I don't have that information' instead of making things up or using general examples."
-        "Move to the next step only after the user has selected one of the options, and proceed according to the terms, budget and details provided."
+        "Move to the next step only after the user has selected one of the options, and proceed according to the terms, budget, remaining budget, and details provided."
         
         Keep conversation history:
-        "Keep conversation history and use the information provided by the user in all previous steps to ensure that the conversation continues consistently."
+        "Keep conversation history and use the information provided by the user in all previous steps to ensure that the conversation continues consistently. Update the remaining budget accordingly after each selection."
     """;
 
     // משתנה לשמירת היסטוריית השיחה
     private final JsonArray conversationHistory = new JsonArray();
 
-    public String getEventPlanningAssistance(String userMessage) {
+    public String getEventPlanningAssistance(String userMessage, String eventDate, String guestCount, String totalBudget, String remainingBudget, String selectedItems) {
+        // החלפת משתני הטקסט בהוראות
+        String assistantInstructions = ASSISTANT_INSTRUCTIONS_TEMPLATE
+                .replace("{event_date}", eventDate)
+                .replace("{guest_count}", guestCount)
+                .replace("{total_budget}", totalBudget)
+                .replace("{remaining_budget}", remainingBudget)
+                .replace("{selected_items}", selectedItems);
+
         JsonObject systemMessage = new JsonObject();
         systemMessage.addProperty("role", "system");
-        systemMessage.addProperty("content", ASSISTANT_INSTRUCTIONS);
+        systemMessage.addProperty("content", assistantInstructions);
 
         JsonObject userMessageObject = new JsonObject();
         userMessageObject.addProperty("role", "user");

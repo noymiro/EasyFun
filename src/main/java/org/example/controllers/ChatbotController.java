@@ -29,10 +29,18 @@ public class ChatbotController {
     }
 
     @GetMapping("/chat")
-    public String chat(@RequestParam String message) {
+    public String chat(
+            @RequestParam String message,
+            @RequestParam String eventDate,
+            @RequestParam String guestCount,
+            @RequestParam String totalBudget,
+            @RequestParam String remainingBudget,
+            @RequestParam String selectedItems) {
+
         logger.info("Using API Key: " + apiKey);
 
-        String response = openAIService.getEventPlanningAssistance(message);
+        // עדכן את הקריאה למתודה עם כל הפרמטרים החדשים
+        String response = openAIService.getEventPlanningAssistance(message, eventDate, guestCount, totalBudget, remainingBudget, selectedItems);
         logger.info("Response from OpenAI: " + response);
 
         // בדוק אם התגובה היא JSON או טקסט רגיל
