@@ -89,6 +89,19 @@ public class GeneralController {
 
     }
 
+    @GetMapping(value = "/get-username")
+    public String getUsernameByEmail(@RequestParam String mail) {
+        if (mail != null && !mail.isEmpty()) {
+            List<User> users = persist.getUsers();
+            for (User user : users) {
+                if (user.getMail().equals(mail)) {
+                    return user.getUsername();
+                }
+            }
+        }
+        return null;
+    }
+
     @RequestMapping(value = "/plan-event")
     public int planEvent(String secret, String typeEvent, String date, String location, int guests, float budget) {
         if (secret != null && secret.length() > 0) {

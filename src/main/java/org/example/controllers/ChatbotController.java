@@ -48,6 +48,57 @@ public class ChatbotController {
         return content;
     }
 
+    @GetMapping("/get-suggested-venues")
+    public String getSuggestedVenues(
+            @RequestParam String eventType,
+            @RequestParam String eventDate,
+            @RequestParam String guestCount,
+            @RequestParam String remainingBudget,
+            @RequestParam String location) {
+
+        logger.info("Received request with eventType: " + eventType + ", eventDate: " + eventDate + ", guestCount: " + guestCount + ", remainingBudget: " + remainingBudget + ", location: " + location);
+
+        String response = openAIService.getSuggestedVenues(eventType, eventDate, guestCount, remainingBudget, location);
+        logger.info("Response from OpenAI: " + response);
+
+        return response;
+    }
+
+    @GetMapping("/get-suggested-food")
+    public String getSuggestedFood(
+            @RequestParam String eventType,
+            @RequestParam String eventDate,
+            @RequestParam String guestCount,
+            @RequestParam String remainingBudget,
+            @RequestParam String location) {
+
+        logger.info("Received food request with eventType: " + eventType + ", eventDate: " + eventDate + ", guestCount: " + guestCount + ", remainingBudget: " + remainingBudget + ", location: " + location);
+
+        String response = openAIService.getSuggestedFood(eventType, eventDate, guestCount, remainingBudget, location);
+        logger.info("Response from OpenAI (food): " + response);
+
+        return response;
+    }
+
+    @GetMapping("/get-suggested-attractions")
+    public String getSuggestedAttractions(
+            @RequestParam String eventType,
+            @RequestParam String eventDate,
+            @RequestParam String guestCount,
+            @RequestParam String remainingBudget,
+            @RequestParam String location) {
+
+        logger.info("Received attractions request with eventType: " + eventType + ", eventDate: " + eventDate + ", guestCount: " + guestCount + ", remainingBudget: " + remainingBudget + ", location: " + location);
+
+        String response = openAIService.getSuggestedAttractions(eventType, eventDate, guestCount, remainingBudget, location);
+        logger.info("Response from OpenAI (attractions): " + response);
+
+        return response;
+    }
+
+
+
+
     private String extractContentFromResponse(String response) {
         try {
             // בדיקה אם התגובה מתחילה ב-{ כדי לוודא שהיא בפורמט JSON
