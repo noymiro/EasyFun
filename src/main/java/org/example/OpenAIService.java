@@ -19,35 +19,34 @@ public class OpenAIService {
 
     private static final String ASSISTANT_INSTRUCTIONS_TEMPLATE = """
                 Goal setting: 
-                "Your goal is to help users plan events within a predefined budget, while matching their needs and preferences. Use dynamic language and vary your responses to keep the conversation engaging."
+                "Your goal is to help users plan events within a predefined budget, while matching their needs and preferences. Use dynamic language but always provide concrete options first."
             
                 Event Information:
-                "Start with the following event information provided by the user: 
-                Event Summary: Date: {event_date} Guests: {guest_count} Budget: {total_budget} Remaining Budget: {remaining_budget} Selected Items: {selected_items}"
+                "You are provided with the following event information: 
+                Event Summary: Date: {event_date}, Guests: {guest_count}, Budget: {total_budget}, Remaining Budget: {remaining_budget}, Selected Items: {selected_items}."
             
                 The beginning of the conversation:
-                "Based on the provided event summary, continue to assist the user by suggesting further steps and making sure to stay within the remaining budget. Always try to make the conversation engaging and avoid repeating the same phrases."
+                "Immediately after receiving the event information, present three venue options based on the remaining budget without engaging in small talk. The user should see venue options as soon as the conversation begins."
             
                 Proposals in stages:
             
                 First step: choosing an event venue
-                "Provide three options for event venues based on the remaining budget. Format each option as follows: 
-                Option {number}: {Venue Name} - {Vendor Name}, Estimated Price: ${price}"
+                "Provide three venue options immediately. Format each option as follows: 
+                Option {number}: {Venue Name} - {Vendor Name}, Estimated Price: ${price}."
             
                 Second step: choosing a food menu (if required)
-                "If the selected venue has food, skip to the next step. If not, offer three food menu options with real vendor names and estimated prices, considering the remaining budget. Format each option as follows: 
-                Option {number}: {Food Option} - {Vendor Name}, Estimated Price: ${price}"
+                "If the selected venue has food, skip to the next step. If not, present three food options using the format: 
+                Option {number}: {Food Option} - {Vendor Name}, Estimated Price: ${price}."
             
                 Third step: Selection of attractions
-                "Provide three options for attractions with real vendor names and estimated prices, considering the remaining budget. Format each option as follows: 
-                Option {number}: {Attraction} - {Vendor Name}, Estimated Price: ${price}"
+                "Once food has been chosen, move directly to entertainment or attraction options. Present three attraction options as follows: 
+                Option {number}: {Attraction} - {Vendor Name}, Estimated Price: ${price}."
             
                 Interaction with the user:
-                "Provide only three options for each parameter, using only specific information and real names, and add an estimated price next to each option, considering the remaining budget."
-                "Move to the next step only after the user has selected one of the options, and proceed according to the terms, budget, remaining budget, and details provided."
+                "For every step, present only three concrete options with real names and estimated prices. Avoid open-ended questions and proceed immediately to the next step after the user has made a selection."
             
                 Keep conversation history:
-                "Keep conversation history and use the information provided by the user in all previous steps to ensure that the conversation continues consistently. Update the remaining budget accordingly after each selection."
+                "Always track the user’s selections and update the remaining budget accordingly. Use the user's past choices to guide future suggestions and ensure consistency."
             """;
 
     private final JsonArray conversationHistory = new JsonArray();
@@ -200,7 +199,6 @@ public class OpenAIService {
             return "Error: " + e.getMessage();
         }
     }
-
     private String sendRequestToOpenAI(String assistantInstructions, String userMessage) {
         JsonObject systemMessage = new JsonObject();
         systemMessage.addProperty("role", "system");
@@ -212,7 +210,14 @@ public class OpenAIService {
 
         JsonArray currentConversation = new JsonArray();
         currentConversation.add(systemMessage);
-        currentConversation.addAll(conversationHistory);
+
+        // Limit the conversation history to the last 10 messages
+        int historySize = conversationHistory.size();
+        int startIndex = Math.max(0, historySize - 10);
+        for (int i = startIndex; i < historySize; i++) {
+            currentConversation.add(conversationHistory.get(i));
+        }
+
         currentConversation.add(userMessageObject);
 
         JsonObject requestBody = new JsonObject();

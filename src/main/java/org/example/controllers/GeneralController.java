@@ -103,19 +103,21 @@ public class GeneralController {
     }
 
     @RequestMapping(value = "/plan-event")
-    public int planEvent(String secret, String typeEvent, String date, String location, int guests, float budget) {
+    public int planEvent(String secret, String typeEvent, String date, String location, Integer guests, Float budget) {
         if (secret != null && secret.length() > 0) {
             if (typeEvent != null && typeEvent.length() > 0) {
                 if (date != null && date.length() > 0) {
-                    if (guests > 0) {
-                        List<User> users = persist.getUsers();
-                        for (User user : users) {
-                            System.out.println(user.getSecret());
-                            if (user.getSecret().equals(secret)) {
-                                System.out.println("Event planned: " + typeEvent + " " + date + " " + guests + " " + location + " " + budget);
-                                Event event = new Event(typeEvent, date, location, guests, budget, secret);
-                                persist.addEvent(event);
-                                return event.getId();
+                    if (guests != null && guests > 0) {
+                        if (budget != null && budget > 0) {
+                            List<User> users = persist.getUsers();
+                            for (User user : users) {
+                                System.out.println(user.getSecret());
+                                if (user.getSecret().equals(secret)) {
+                                    System.out.println("Event planned: " + typeEvent + " " + date + " " + guests + " " + location + " " + budget);
+                                    Event event = new Event(typeEvent, date, location, guests, budget, secret);
+                                    persist.addEvent(event);
+                                    return event.getId();
+                                }
                             }
                         }
                     }
@@ -146,6 +148,25 @@ public class GeneralController {
             for (User user : users) {
                 if (user.getSecret().equals(secret)) {
                     return persist.getPersonalArea(secret);
+                }
+            }
+        }
+        return null;
+    }
+
+    @RequestMapping(value = "/isSimilarEventExists", method = RequestMethod.GET)
+    public Event isSimilarEventExists(@RequestParam String secret, @RequestParam String typeEvent, @RequestParam String location, @RequestParam Integer guests, @RequestParam Float budget) {
+        if (secret != null && secret.length() > 0) {
+            if (typeEvent != null && typeEvent.length() > 0) {
+                if (location != null && location.length() > 0) {
+                    if (guests != null && guests > 0) {
+                        if (budget != null && budget > 0) {
+                            Event event = persist.isSimilarEventExists(typeEvent, location, guests, budget);
+                            if (event != null) {
+                                return event;
+                            }
+                        }
+                    }
                 }
             }
         }

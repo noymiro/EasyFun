@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
     <class name="org.example.entities.User" table="users" lazy="false">
@@ -28,6 +25,71 @@
             <list-index column="list_index"/>
             <element type="string" column="element"/>
         </list>
+    </class>
+
+    <class name="org.example.entities.Item" table="items" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="price" type="float" column="price"/>
+        <property name="description" type="string" column="description"/>
+    </class>
+
+
+    <class name="org.example.entities.elements.Place" table="elements" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="name"/>
+        <property name="category" type="string" column="category"/>
+        <property name="price" type="float" column="price"/>
+        <property name="description" type="string" column="description"/>
+        <property name="address" type="string" column="address"/>
+        <property name="phoneNumber" type="string" column="phone_number"/>
+        <property name="website" type="string" column="website"/>
+        <property name="email" type="string" column="email"/>
+        <property name="openingHours" type="string" column="opening_hours"/>
+        <property name="closingHours" type="string" column="closing_hours"/>
+    </class>
+
+
+    <class name="org.example.entities.elements.Food" table="elements" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="price" type="float" column="price"/>
+        <property name="description" type="string" column="description"/>
+        <property name="ingredients" type="string" column="ingredients"/>
+    </class>
+
+    <class name="org.example.entities.elements.Attraction" table="elements" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="price" type="float" column="price"/>
+        <property name="description" type="string" column="description"/>
+        <property name="address" type="string" column="address"/>
+        <property name="phoneNumber" type="string" column="phone_number"/>
+        <property name="website" type="string" column="website"/>
+        <property name="email" type="string" column="email"/>
+        <property name="openingHours" type="string" column="opening_hours"/>
+        <property name="closingHours" type="string" column="closing_hours"/>
+
+    </class>
+
+    <class name="org.example.entities.elements.EventAddition" table="elements" lazy="false">
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="price" type="float" column="price"/>
+        <property name="description" type="string" column="description"/>
+        <property name="address" type="string" column="address"/>
+        <property name="phoneNumber" type="string" column="phone_number"/>
+        <property name="website" type="string" column="website"/>
+        <property name="email" type="string" column="email"/>
+        <property name="openingHours" type="string" column="opening_hours"/>
+        <property name="closingHours" type="string" column="closing_hours"/>
+
     </class>
 
 </hibernate-mapping>

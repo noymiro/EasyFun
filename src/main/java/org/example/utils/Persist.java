@@ -1,7 +1,13 @@
 package org.example.utils;
 
+import net.bytebuddy.implementation.bytecode.Addition;
+import org.example.entities.Item;
 import org.example.entities.User;
 import org.example.entities.Event;
+import org.example.entities.elements.Attraction;
+import org.example.entities.elements.EventAddition;
+import org.example.entities.elements.Food;
+import org.example.entities.elements.Place;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -172,6 +178,39 @@ public class Persist {
         }
     }
 
+    public Event isSimilarEventExists(String eventType, String location, Integer guests, Float budget) {
+        Event event = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+
+            // Calculate the budget range with a 10% tolerance
+            float lowerBudgetBound = budget * 0.9f;
+            float upperBudgetBound = budget * 1.1f;
+
+            // Calculate the guests range with a 10% tolerance
+            int lowerGuestsBound = Math.round(guests * 0.9f);
+            int upperGuestsBound = Math.round(guests * 1.1f);
+
+            // Query to check if an event with the same type, location, guests, and budget exists
+            String hql = "FROM Event WHERE typeEvent = :eventType AND location = :location AND guests BETWEEN :lowerGuestsBound AND :upperGuestsBound AND budget BETWEEN :lowerBudgetBound AND :upperBudgetBound";
+            Query query = session.createQuery(hql);
+            query.setParameter("eventType", eventType);
+            query.setParameter("location", location);
+            query.setParameter("lowerGuestsBound", lowerGuestsBound);
+            query.setParameter("upperGuestsBound", upperGuestsBound);
+            query.setParameter("lowerBudgetBound", lowerBudgetBound);
+            query.setParameter("upperBudgetBound", upperBudgetBound);
+            List<Event> results = query.getResultList();
+
+            if (!results.isEmpty()) {
+                event = results.get(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return event;
+    }
+
     public List<Object[]> getPersonalArea(String secret) {
         List<Object[]> results = null;
         try {
@@ -191,4 +230,31 @@ public class Persist {
         }
         return results;
     }
+
+
+
+
+    public void addItem(Object item) {
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            session.save(item);
+            if (item instanceof Food) {
+                Food food = (Food) item;
+                session.save(food);
+            } else if (item instanceof Attraction) {
+                Attraction attraction = (Attraction) item;
+                session.save(attraction);
+            } else if (item instanceof EventAddition) {
+                EventAddition eventAddition = (EventAddition) item;
+                session.save(eventAddition);
+            } else if (item instanceof Place) {
+                Place place = (Place) item;
+                session.save(place);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
