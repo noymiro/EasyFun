@@ -6,7 +6,9 @@ import org.example.responses.BasicResponse;
 import org.example.utils.EmailValidator;
 import org.example.utils.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.responses.LoginResponse;
 import org.example.utils.Persist;
@@ -77,6 +79,32 @@ public class GeneralController {
         }
         return false;
     }
+
+    @RequestMapping(value = "/update_password", method = RequestMethod.GET)
+    public ResponseEntity<String> updatePassword(
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmNewPassword,
+            @RequestParam String secret) {
+
+        // בדיקה של תקינות הפרמטרים
+        if (oldPassword == null || newPassword == null || confirmNewPassword == null || secret == null) {
+            return ResponseEntity.badRequest().body("Missing parameters");
+        }
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            return ResponseEntity.badRequest().body("New passwords don't match");
+        }
+
+        // קריאה לפונקציה ב-Persist
+        boolean updated = persist.updatePassword(oldPassword, newPassword, secret);
+        if (updated) {
+            return ResponseEntity.ok("Password updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found or old password is incorrect");
+        }
+    }
+
 
     @RequestMapping(value = "/get-userByMail")
     public String getUser(String mail) {

@@ -11,8 +11,8 @@ public class Food extends Item {
 
 
 
-    public Food(String name, String category, float price, String description,int id) {
-        super(name, category, price, description,id);
+    public Food(String name, String category, float price, String description,String location) {
+        super(name, category, price, description, location);
 
     }
 

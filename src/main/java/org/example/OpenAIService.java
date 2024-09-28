@@ -18,49 +18,59 @@ public class OpenAIService {
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
     private static final String ASSISTANT_INSTRUCTIONS_TEMPLATE = """
-                Goal setting: 
-                "Your goal is to help users plan events within a predefined budget, while matching their needs and preferences. Use dynamic language but always provide concrete options first."
-            
-                Event Information:
-                "You are provided with the following event information: 
-                Event Summary: Date: {event_date}, Guests: {guest_count}, Budget: {total_budget}, Remaining Budget: {remaining_budget}, Selected Items: {selected_items}."
-            
-                The beginning of the conversation:
-                "Immediately after receiving the event information, present three venue options based on the remaining budget without engaging in small talk. The user should see venue options as soon as the conversation begins."
-            
-                Proposals in stages:
-            
-                First step: choosing an event venue
-                "Provide three venue options immediately. Format each option as follows: 
-                Option {number}: {Venue Name} - {Vendor Name}, Estimated Price: ${price}."
-            
-                Second step: choosing a food menu (if required)
-                "If the selected venue has food, skip to the next step. If not, present three food options using the format: 
-                Option {number}: {Food Option} - {Vendor Name}, Estimated Price: ${price}."
-            
-                Third step: Selection of attractions
-                "Once food has been chosen, move directly to entertainment or attraction options. Present three attraction options as follows: 
-                Option {number}: {Attraction} - {Vendor Name}, Estimated Price: ${price}."
-            
-                Interaction with the user:
-                "For every step, present only three concrete options with real names and estimated prices. Avoid open-ended questions and proceed immediately to the next step after the user has made a selection."
-            
-                Keep conversation history:
-                "Always track the user’s selections and update the remaining budget accordingly. Use the user's past choices to guide future suggestions and ensure consistency."
-            """;
+    Goal setting:
+    "Your goal is to assist users in enhancing their event by suggesting additional items or services within the remaining budget. Adapt your suggestions based on the event type, location, and selected items. Ensure all responses are formatted consistently with three concrete options."
+
+    Event Information:
+    "You are provided with the following event details:
+    - Event Date: {event_date}
+    - Number of Guests: {guest_count}
+    - Total Budget: ${total_budget}
+    - Remaining Budget: ${remaining_budget}
+    - Selected Items: {selected_items}
+    - Event Location: {location}"
+    
+    Start of the conversation:
+    "Present three additional service or item options based on the remaining budget and event type. Avoid small talk. The user should immediately see relevant options in three precise lines."
+
+    Response Template:
+    "Always format your responses in the following structure:
+    
+    Option {number}: {Option Name} - {Vendor Name}, Estimated Price: ${price}
+    
+    Example:
+    Option 1: Photographer - Event Photos Ltd., Estimated Price: $1,000
+    Option 2: Decoration - Party Design Co., Estimated Price: $500
+    Option 3: Sound System - DJ Sound Experts, Estimated Price: $750
+    
+    Remaining Budget: ${remaining_budget}"
+    
+    Proposals in stages:
+    "For each step, provide three concrete options formatted using the template above. Ensure the options fit within the remaining budget."
+
+    Budget management:
+    "After each selection, update the remaining budget and present only options that fit within it using the template. If the remaining budget is low, present low-cost alternatives or suggest skipping certain elements."
+    
+    Adaptation:
+    "Adapt your responses based on the user's past choices and remaining budget. Always follow the three-line format."
+""";
+
+
+
 
     private final JsonArray conversationHistory = new JsonArray();
 
     @Value("${openai.api.key}")
     private String apiKey;
 
-    public String getEventPlanningAssistance(String userMessage, String eventDate, String guestCount, String totalBudget, String remainingBudget, String selectedItems) {
+    public String getEventPlanningAssistance(String userMessage, String eventDate, String guestCount, String totalBudget, String remainingBudget, String selectedItems,String location) {
         String assistantInstructions = ASSISTANT_INSTRUCTIONS_TEMPLATE
                 .replace("{event_date}", eventDate)
                 .replace("{guest_count}", guestCount)
                 .replace("{total_budget}", totalBudget)
                 .replace("{remaining_budget}", remainingBudget)
-                .replace("{selected_items}", selectedItems);
+                .replace("{selected_items}", selectedItems)
+                .replace("{location}", location);
 
         return sendRequestToOpenAI(assistantInstructions, userMessage);
     }
@@ -73,7 +83,8 @@ public class OpenAIService {
 
         String assistantInstructions = String.format("""
         Goal setting: 
-        "Your goal is to suggest three suitable venues for an event based on the event type, date, guest count, budget, and location. Ensure the venues exist in the specified location. If a suitable venue is not found, clearly state 'No suitable venue found' with a price of $0."
+        "Your goal is to suggest three suitable venues for an event based on the event type, date, guest count, budget, and location.
+        Ensure the venues exist in the specified location. If a suitable venue is not found, clearly state 'No suitable venue found' with a price of $0."
 
         Event Information:
         "Event Type: %s, Event Date: %s, Number of Guests: %s, Remaining Budget: %s, Location: %s"
@@ -82,14 +93,15 @@ public class OpenAIService {
         "Based on the provided event information, suggest three venue options:
         1. Low-cost option (up to %d USD)
         2. Mid-range option (up to %d USD)
-        3. High-end option (up to %d USD, but not exceeding 30%% of the total budget)
+        3. High-end option (up to %d USD, but not exceeding 30%% of the total budget).
 
-        If no venue fits the criteria, state 'No suitable venue found - $0' for that option. Do not invent venues. Ensure all venues suggested exist in the specified location."
+        If no venue fits the criteria, state 'No suitable venue found - $0' for that option. Do not invent venues. 
+        Ensure all venues suggested exist in the specified location."
 
         Example Format:
         "1. Venue Name - Brief description - Estimated price
         2. Venue Name - Brief description - Estimated price
-        3. Venue Name - Brief description - Estimated price"
+        3. Venue Name - Brief description - Estimated price."
         """, eventType, eventDate, guestCount, remainingBudget, location, lowBudgetLimit, midBudgetLimit, highBudgetLimit);
 
         return sendRequestToOpenAI(assistantInstructions);
@@ -102,28 +114,31 @@ public class OpenAIService {
         int lowBudgetLimit = (int) (budget * 0.10);
 
         String assistantInstructions = String.format("""
-        Goal setting: 
-        "Your goal is to suggest three suitable food options for an event based on the event type, date, guest count, budget, and location. Ensure the food options are feasible and within the specified budget limits."
+    Goal setting: 
+    "Your goal is to suggest three suitable food options for an event based on the event type, date, guest count, budget, and location. 
+    Ensure that each option includes the name of the food, a **concise description** (up to 100 characters), and the estimated price in USD."
+    Event Information:
+    "Event Type: %s, Event Date: %s, Number of Guests: %s, Remaining Budget: %s, Location: %s"
+    Response Guidelines:
+    "Based on the provided event information, suggest three food options:
+    1. Low-cost option (up to %d USD)
+    2. Mid-range option (up to %d USD)
+    3. High-end option (up to %d USD, but not exceeding 30%% of the total budget).
+    Each option should follow this format:
+    1. [Food Option Name] - [Concise description, max 100 characters] - Estimated price: $[price]
+    2. [Food Option Name] - [Concise description, max 100 characters] - Estimated price: $[price]
+    3. [Food Option Name] - [Concise description, max 100 characters] - Estimated price: $[price]
+    Example response:
+    1. Vegan Salad Bar - Fresh salads with seasonal veggies and toppings - Estimated price: $300
+    2. BBQ Grill - Grilled meats and vegetables with sauces - Estimated price: $600
+    3. Seafood Platter - A selection of local seafood, including shrimp and fish - Estimated price: $1200
 
-        Event Information:
-        "Event Type: %s, Event Date: %s, Number of Guests: %s, Remaining Budget: %s, Location: %s"
-
-        Response Guidelines:
-        "Based on the provided event information, suggest three food options:
-        1. Low-cost option (up to %d USD)
-        2. Mid-range option (up to %d USD)
-        3. High-end option (up to %d USD, but not exceeding 30%% of the total budget)
-
-        If no food fits the criteria, state 'No suitable food option found - $0' for that option."
-
-        Example Format:
-        "1. Food Option Name - Brief description - Estimated price
-        2. Food Option Name - Brief description - Estimated price
-        3. Food Option Name - Brief description - Estimated price"
-        """, eventType, eventDate, guestCount, remainingBudget, location, lowBudgetLimit, midBudgetLimit, highBudgetLimit);
+    If no food fits the criteria, state 'No suitable food option found - $0' for that option."
+    """, eventType, eventDate, guestCount, remainingBudget, location, lowBudgetLimit, midBudgetLimit, highBudgetLimit);
 
         return sendRequestToOpenAI(assistantInstructions);
     }
+
 
     public String getSuggestedAttractions(String eventType, String eventDate, String guestCount, String remainingBudget, String location) {
         int budget = Integer.parseInt(remainingBudget);
@@ -132,25 +147,30 @@ public class OpenAIService {
         int lowBudgetLimit = (int) (budget * 0.10);
 
         String assistantInstructions = String.format("""
-        Goal setting: 
-        "Your goal is to suggest three suitable attractions for an event based on the event type, date, guest count, budget, and location. Ensure the attractions are feasible and within the specified budget limits."
+Goal setting:
+"Your goal is to suggest three suitable attractions or activities for an event based on the event type, date, guest count, budget, and the pre-selected location. Ensure all suggestions are feasible, within the specified budget limits, and logically appropriate for the chosen location and event type."
 
-        Event Information:
-        "Event Type: %s, Event Date: %s, Number of Guests: %s, Remaining Budget: %s, Location: %s"
+Event Information:
+"Event Type: %s, Event Date: %s, Number of Guests: %s, Remaining Budget: %s, Location: %s"
 
-        Response Guidelines:
-        "Based on the provided event information, suggest three attractions:
-        1. Low-cost option (up to %d USD)
-        2. Mid-range option (up to %d USD)
-        3. High-end option (up to %d USD, but not exceeding 30%% of the total budget)
+Response Guidelines:
+"Based on the provided event information, suggest three attractions or activities that are suitable for the selected location:
+1. A low-cost option (up to %d USD)
+2. A mid-range option (up to %d USD)
+3. A high-end option (up to %d USD, but not exceeding 30%% of the total budget)
 
-        If no attraction fits the criteria, state 'No suitable attraction found - $0' for that option."
+Ensure all suggestions are logically consistent with the location. For example, don't suggest outdoor activities for an indoor venue. If no suitable option is found for any category, state 'No suitable option found - 0 USD' for that item.
 
-        Example Format:
-        "1. Attraction Name - Brief description - Estimated price
-        2. Attraction Name - Brief description - Estimated price
-        3. Attraction Name - Brief description - Estimated price"
-        """, eventType, eventDate, guestCount, remainingBudget, location, lowBudgetLimit, midBudgetLimit, highBudgetLimit);
+Important: 
+- Do not mention the budget category in the response. 
+- Present prices as whole numbers without decimals or currency symbols.
+- Do not use any punctuation at the end of the price or anywhere else in the response."
+
+Example Format:
+"1. Attraction/Activity Name - Brief description - Estimated price
+2. Attraction/Activity Name - Brief description - Estimated price
+3. Attraction/Activity Name - Brief description - Estimated price."
+""", eventType, eventDate, guestCount, remainingBudget, location, lowBudgetLimit, midBudgetLimit, highBudgetLimit);
 
         return sendRequestToOpenAI(assistantInstructions);
     }
@@ -211,7 +231,6 @@ public class OpenAIService {
         JsonArray currentConversation = new JsonArray();
         currentConversation.add(systemMessage);
 
-        // Limit the conversation history to the last 10 messages
         int historySize = conversationHistory.size();
         int startIndex = Math.max(0, historySize - 10);
         for (int i = startIndex; i < historySize; i++) {

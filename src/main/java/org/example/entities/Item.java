@@ -5,17 +5,27 @@ public class Item {
     private String category;
     private float price;
     private String description;
+    private String location;
     private int id;
 
     public Item() {
     }
 
-    public Item(String name, String category, float price, String description, int id) {
+    public Item(String name, String category, float price, String description, String location) {
         this.name = name;
         this.category = category;
         this.price = price;
         this.description = description;
-        this.id = id;
+        this.location = location;
+
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public int getId() {

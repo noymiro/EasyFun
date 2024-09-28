@@ -13,19 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.hibernate.Session;
+
 import javax.annotation.PostConstruct;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Transactional
 @Component
 @SuppressWarnings("unchecked")
-public class Persist {
+public class Persist implements PersistService {
 
     private final SessionFactory sessionFactory;
     private Connection connection;
-
 
     @Autowired
     public Persist(SessionFactory sf) {
@@ -35,9 +37,7 @@ public class Persist {
     @PostConstruct
     public void init() {
         createDbConnection(Constants.DB_USERNAME, Constants.DB_PASSWORD);
-
     }
-
 
     private void createDbConnection(String username, String password) {
         try {
@@ -50,7 +50,7 @@ public class Persist {
         }
     }
 
-
+    @Override
     public User login(String mail, String password) {
         User user = null;
         try {
@@ -65,6 +65,7 @@ public class Persist {
         return user;
     }
 
+    @Override
     public boolean checkIfUsernameAvailable(String username) {
         boolean available = false;
         try {
@@ -80,6 +81,7 @@ public class Persist {
         return available;
     }
 
+    @Override
     public boolean addUser(User user) {
         boolean success = false;
         try {
@@ -92,6 +94,33 @@ public class Persist {
         return success;
     }
 
+    public boolean updatePassword(String oldPassword, String newPassword, String secret) {
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            Query query = session.createQuery("FROM User WHERE password = :oldPassword AND secret = :secret");
+            query.setParameter("oldPassword", oldPassword);
+            query.setParameter("secret", secret);
+            User user = null;
+            try {
+                user = (User) query.getSingleResult();
+            } catch (NoResultException e) {
+                System.out.println("No user found with the provided old password and secret.");
+                return false;
+            }
+            if (user != null) {
+                user.setPassword(newPassword);
+                session.update(user);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+        @Override
     public List<User> getUsers() {
         List<User> users = null;
         try {
@@ -99,11 +128,11 @@ public class Persist {
             users = session.createQuery("FROM User").getResultList();
         } catch (Exception e) {
             e.printStackTrace();
-
         }
         return users;
     }
 
+    @Override
     public String getSecretUserByMail(String mail) {
         String secret = null;
         try {
@@ -116,9 +145,9 @@ public class Persist {
             e.printStackTrace();
         }
         return secret;
-
     }
 
+    @Override
     public boolean addEvent(Event event) {
         boolean success = false;
         try {
@@ -131,6 +160,7 @@ public class Persist {
         return success;
     }
 
+    @Override
     public List<Event> getEvents() {
         List<Event> events = null;
         try {
@@ -138,11 +168,11 @@ public class Persist {
             events = session.createQuery("FROM Event").getResultList();
         } catch (Exception e) {
             e.printStackTrace();
-
         }
         return events;
     }
 
+    @Override
     public Event getEventBySecret(String secret) {
         Event event = null;
         try {
@@ -156,6 +186,7 @@ public class Persist {
         return event;
     }
 
+    @Override
     public Event getEventById(int id) {
         Event event = null;
         try {
@@ -169,6 +200,7 @@ public class Persist {
         return event;
     }
 
+    @Override
     public void updateEvent(Event event) {
         try {
             Session session = sessionFactory.getCurrentSession();
@@ -178,6 +210,7 @@ public class Persist {
         }
     }
 
+    @Override
     public Event isSimilarEventExists(String eventType, String location, Integer guests, Float budget) {
         Event event = null;
         try {
@@ -211,6 +244,7 @@ public class Persist {
         return event;
     }
 
+    @Override
     public List<Object[]> getPersonalArea(String secret) {
         List<Object[]> results = null;
         try {
@@ -231,9 +265,7 @@ public class Persist {
         return results;
     }
 
-
-
-
+    @Override
     public void addItem(Object item) {
         try {
             Session session = sessionFactory.getCurrentSession();
@@ -256,5 +288,77 @@ public class Persist {
         }
     }
 
+    @Override
+    public List<Item> getItems() {
+        List<Item> items = null;
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            items = session.createQuery("FROM Item").getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
 
+    @Override
+    public void deleteItem(int id) {
+        try {
+            Session session = sessionFactory.getCurrentSession();
+            Item item = session.get(Item.class, id);
+            session.delete(item);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Item> getItemsByCategory(String category) {
+        List<Item> items = null;
+        try {
+            switch (category) {
+                case "Food":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM foods").getResultList();
+                    break;
+                case "Attraction":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM attractions").getResultList();
+                    break;
+                case "Place":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM places").getResultList();
+                    break;
+                default:
+                    items = sessionFactory.getCurrentSession().createQuery("FROM eventaddition").getResultList();
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    @Override
+    public List<Item> getItemsByCategoryAndBudget(String category, float remainingBudget,String location) {
+        List<Item> items = new ArrayList<>(); // Initialize the list
+        System.out.println("items from db - "+ "Remaining budget: " + remainingBudget);
+        try {
+            switch (category) {
+                case "Food":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM Food WHERE price <= :remainingBudget AND location = :location").setParameter("remainingBudget", remainingBudget).setParameter("location", location).getResultList();
+                    break;
+                case "Attraction":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM Attraction WHERE price <= :remainingBudget AND location = :location").setParameter("remainingBudget", remainingBudget).setParameter("location", location).getResultList();
+                    break;
+                case "Place":
+                    items = sessionFactory.getCurrentSession().createQuery("FROM Place WHERE price <= :remainingBudget AND location = :location").setParameter("remainingBudget", remainingBudget).setParameter("location", location).getResultList();
+                    break;
+                default:
+                    items = sessionFactory.getCurrentSession().createQuery("FROM EventAddition WHERE price <= :remainingBudget AND location = :location").setParameter("remainingBudget", remainingBudget).setParameter("location", location).getResultList();
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("items from db - "+ items);
+        return items;
+    }
 }

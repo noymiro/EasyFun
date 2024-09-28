@@ -3,7 +3,6 @@ package org.example.entities.elements;
 import org.example.entities.Item;
 
 public class EventAddition extends Item {
-    private String address;
     private String phoneNumber;
     private String website;
     private String email;
@@ -25,17 +24,9 @@ public class EventAddition extends Item {
 //        this.image = image;
 //    }
 
-    public EventAddition(String name, String category, float price, String description,int id){
-        super(name, category, price, description,id);
+    public EventAddition(String name, String category, float price, String description,String location){
+        super(name, category, price, description, location);
 
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getPhoneNumber() {

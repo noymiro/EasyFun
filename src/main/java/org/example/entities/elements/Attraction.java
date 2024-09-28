@@ -25,8 +25,8 @@ public class Attraction extends Item {
 //        this.image = image;
 //    }
 
-    public Attraction(String name, String category, float price, String description,int id){
-        super(name, category, price, description,id);
+    public Attraction(String name, String category, float price, String description,String location){
+        super(name, category, price, description, location);
 
     }
 

@@ -4,7 +4,6 @@ import org.example.entities.Item;
 
 public class Place  extends Item {
     private int id;
-    private String address;
     private String phoneNumber;
     private String website;
     private String email;
@@ -15,9 +14,8 @@ public class Place  extends Item {
     public Place() {
     }
 
-    public Place(String name, String category, float price, String description, String address, String phoneNumber, String website, String email, String openingHours, String closingHours, String image, int id) {
-        super(name, category, price, description, id);
-        this.address = address;
+    public Place(String name, String category, float price, String description, String location, String phoneNumber, String website, String email, String openingHours, String closingHours, String image) {
+        super(name, category, price, description,location);
         this.phoneNumber = phoneNumber;
         this.website = website;
         this.email = email;
@@ -27,8 +25,8 @@ public class Place  extends Item {
 
     }
 
-    public Place(String name, String category, float price, String description,int id) {
-        super(name, category, price, description,id);
+    public Place(String name, String category, float price, String description,String location) {
+        super(name, category, price, description, location);
 
     }
 
@@ -38,14 +36,6 @@ public class Place  extends Item {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getPhoneNumber() {
